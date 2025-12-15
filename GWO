@@ -1,0 +1,64 @@
+import numpy as np
+
+# Objective function (Sphere function)
+def fitness_function(x):
+    return np.sum(x ** 2)
+
+def grey_wolf_optimizer():
+    dim = 2
+    num_wolves = 5
+    max_iter = 10
+    lb, ub = -10, 10
+
+    # Initialize wolves randomly
+    wolves = np.random.uniform(lb, ub, (num_wolves, dim))
+
+    alpha, beta, delta = np.zeros(dim), np.zeros(dim), np.zeros(dim)
+    alpha_score = beta_score = delta_score = float("inf")
+
+    for t in range(max_iter):
+        for i in range(num_wolves):
+            fitness = fitness_function(wolves[i])
+
+            if fitness < alpha_score:
+                delta_score, delta = beta_score, beta.copy()
+                beta_score, beta = alpha_score, alpha.copy()
+                alpha_score, alpha = fitness, wolves[i].copy()
+            elif fitness < beta_score:
+                delta_score, delta = beta_score, beta.copy()
+                beta_score, beta = fitness, wolves[i].copy()
+            elif fitness < delta_score:
+                delta_score, delta = fitness, wolves[i].copy()
+
+        a = 2 - 2 * (t / max_iter)
+
+        for i in range(num_wolves):
+            for j in range(dim):
+                r1, r2 = np.random.rand(), np.random.rand()
+                A1 = 2 * a * r1 - a
+                C1 = 2 * r2
+                D_alpha = abs(C1 * alpha[j] - wolves[i][j])
+                X1 = alpha[j] - A1 * D_alpha
+
+                r1, r2 = np.random.rand(), np.random.rand()
+                A2 = 2 * a * r1 - a
+                C2 = 2 * r2
+                D_beta = abs(C2 * beta[j] - wolves[i][j])
+                X2 = beta[j] - A2 * D_beta
+
+                r1, r2 = np.random.rand(), np.random.rand()
+                A3 = 2 * a * r1 - a
+                C3 = 2 * r2
+                D_delta = abs(C3 * delta[j] - wolves[i][j])
+                X3 = delta[j] - A3 * D_delta
+
+                wolves[i][j] = (X1 + X2 + X3) / 3
+
+        print(f"Iteration {t+1:<2} | Best Fitness = {alpha_score:.4f}")
+
+    print("\nBest Solution:", alpha)
+    print("Best Fitness Value:", alpha_score)
+
+
+# Run the optimizer
+grey_wolf_optimizer()
